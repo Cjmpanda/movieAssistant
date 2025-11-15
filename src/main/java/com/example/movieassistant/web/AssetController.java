@@ -23,6 +23,7 @@ public class AssetController {
     @GetMapping
     public String myAssets(HttpSession session, Model model) {
         String username = SessionUtil.currentUser(session);
+        if (username == null) return "redirect:/login";
         model.addAttribute("assets", ai.listFor(username));
         model.addAttribute("username", username);
         return "assets_index"; // <-- no .jte
@@ -31,6 +32,7 @@ public class AssetController {
     @GetMapping("/{id}")
     public String view(@PathVariable long id, HttpSession session, Model model) {
         String username = SessionUtil.currentUser(session);
+        if (username == null) return "redirect:/login";
         var asset = ai.findOwned(username, id);
         if (asset == null) return "redirect:/assets";
         model.addAttribute("asset", asset);
@@ -40,6 +42,8 @@ public class AssetController {
 
     @GetMapping("/new")
     public String newForm(HttpSession session, Model model) {
+        String username = SessionUtil.currentUser(session);
+        if (username == null) return "redirect:/login";
         model.addAttribute("username", SessionUtil.currentUser(session));
         return "assets_new";
     }
