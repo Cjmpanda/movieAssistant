@@ -1,4 +1,8 @@
 @import com.example.movieassistant.model.AIAsset
+@import com.example.movieassistant.model.RecommendationResult
+@import com.example.movieassistant.model.MovieRecommendation
+
+@param RecommendationResult recs
 @param AIAsset asset
 @param String username
 
@@ -18,7 +22,6 @@
         .recommendation-box { background-color: #cfe2ff; border-radius: 8px; padding: 40px; text-align: left; }
         .btn-custom { border-radius: 12px; }
         .no-bg { background-color: transparent !important; }
-        .spacer { margin-top: 20px; }
         .timestamp { color: #6c757d; font-size: 0.9rem; }
         pre { white-space: pre-wrap; background: transparent; border: none; font-family: inherit; }
     </style>
@@ -41,9 +44,7 @@
 <div class="container mb-3">
     <div class="row">
         <div class="col-md-9">
-            <div class="no-bg">
-                <h4 class="fw-bold text-primary mb-3">${asset.getTitle()}</h4>
-            </div>
+            <h4 class="fw-bold text-primary mb-3">${asset.getTitle()}</h4>
         </div>
         <div class="col-md-3 d-flex align-items-center">
             <a href="/assets" class="btn btn-outline-secondary w-100 fw-bold">
@@ -53,7 +54,61 @@
     </div>
 
     <div class="recommendation-box mt-3 shadow-sm">
-        <pre>${asset.getContent()}</pre>
+
+        @if(recs != null && recs.getRecommendations() != null && !recs.getRecommendations().isEmpty()) {
+            <div class="row">
+
+                @for(int i = 0; i < recs.getRecommendations().size(); i++) {
+
+                    <div class="col-md-6 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+
+                                <h5 class="card-title">
+                                    ${recs.getRecommendations().get(i).getTitle()}
+                                    @if(recs.getRecommendations().get(i).getYear() != null) {
+                                        <small class="text-muted">
+                                            (${recs.getRecommendations().get(i).getYear()})
+                                        </small>
+                                    @endif
+                                </h5>
+
+                                @if(recs.getRecommendations().get(i).getPitch() != null) {
+                                    <p class="card-text">
+                                        ${recs.getRecommendations().get(i).getPitch()}
+                                    </p>
+                                @endif
+
+                                @if(recs.getRecommendations().get(i).getServices() != null
+                            && !recs.getRecommendations().get(i).getServices().isEmpty()) {
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            Available on:
+                                            ${String.join(", ", recs.getRecommendations().get(i).getServices())}
+                                        </small>
+                                    </p>
+                                @endif
+
+                                <form method="post" action="/assets/${asset.getId()}/watchlist">
+                                    <input type="hidden" name="index" value="${i}">
+                                    <button type="submit" class="btn btn-sm btn-primary btn-custom">
+                                        <i class="bi bi-bookmark-plus"></i> Add to Watchlist
+                                    </button>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                @endfor
+
+            </div>
+        @endif
+
+        @if(recs == null || recs.getRecommendations() == null || recs.getRecommendations().isEmpty()) {
+            <pre>${asset.getContent()}</pre>
+        @endif
+
     </div>
 </div>
 
