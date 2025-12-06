@@ -37,6 +37,9 @@ public class AssetController {
         if (asset == null) return "redirect:/assets";
         model.addAttribute("asset", asset);
         model.addAttribute("username", username);
+        //
+        model.addAttribute("recs", ai.getRecommendations(id));
+        //
         return "assets_view";
     }
 
@@ -66,9 +69,10 @@ public class AssetController {
 
         StringBuilder sb = new StringBuilder();
         sb.append("You are Movie Assistant. Recommend 5 movies the user will love.\n");
-        sb.append("- Give a one-sentence pitch for each.\n");
-        sb.append("- Include year and where to stream if possible.\n");
-        sb.append("- Avoid spoilers.\n\n");
+        sb.append("- For each movie, provide: title, year, services, pitch.\n");
+        sb.append("- 'services' should be a list of streaming platforms (e.g. [\"Netflix\", \"Hulu\"]).\n");
+        sb.append("- Avoid spoilers.\n");
+        sb.append("- Follow the JSON schema provided by the system.\n\n");
 
         if (genres != null && !genres.isEmpty()) {
             sb.append("Preferred genres: ").append(String.join(", ", genres)).append("\n");

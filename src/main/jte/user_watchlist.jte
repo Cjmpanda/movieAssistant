@@ -1,4 +1,7 @@
+@import com.example.movieassistant.model.WatchlistItem
+
 @param String username
+@param java.util.List<WatchlistItem> items
 
 <!doctype html>
 <html lang="en">
@@ -11,70 +14,96 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        body { background:#f8f9fa; margin:0; font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
-        header { background:#d9eafd; border-bottom:2px solid #c5d9f7; padding:.75rem 1rem; }
-        .brand { font-weight:700; font-size:1.5rem; color:#0d6efd; }
-        .watch-card { background:white; border-radius:.5rem; box-shadow:0 4px 8px rgba(0,0,0,0.05); padding:1rem; margin-bottom:1rem; }
+        body { background-color: #f8f9fa; padding: 20px; }
+        .box { background-color: #d9eafd; border-radius: 8px; padding: 15px; margin-bottom: 15px; text-align: center; }
+        .btn-custom { border-radius: 12px; }
+        .timestamp { color: #6c757d; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="container d-flex align-items-center">
-        <div class="brand d-flex align-items-center gap-2">
-            <i class="bi bi-film"></i> Movie Assistant
+<!-- Header -->
+<div class="container text-center mb-4">
+    <div class="box">
+        <h1 class="fw-bold text-primary">
+            <i class="bi bi-bookmark-heart"></i> ${username}'s Watchlist
+        </h1>
+        <div class="timestamp">
+            Keep track of movies and shows you want to watch.
         </div>
-        <div class="ms-auto">
-            <span class="me-2">Hello, <strong>${username}</strong></span>
-            <a href="/logout" class="btn btn-outline-dark btn-sm fw-semibold">
-                <i class="bi bi-box-arrow-right"></i> Logout
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mb-3">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <a href="/assets" class="btn btn-outline-secondary btn-custom">
+                <i class="bi bi-arrow-left"></i> Back to Recommendations
+            </a>
+        </div>
+        <div class="col-md-6 text-md-end mt-2 mt-md-0">
+            <a href="/assets/new" class="btn btn-primary btn-custom">
+                <i class="bi bi-stars"></i> Get New AI Recommendations
             </a>
         </div>
     </div>
-</header>
 
-<main class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="fw-bold text-primary mb-0">
-            <i class="bi bi-bookmark-heart"></i> My Watchlist
-        </h2>
-        <a href="/assets" class="btn btn-primary fw-semibold">
-            <i class="bi bi-stars"></i> AI Recommendations
-        </a>
-    </div>
-
-    <!-- Sample static items; replace with your dynamic list if desired -->
-    <div class="watch-card">
-        <h5 class="fw-bold mb-1">Inception (2010)</h5>
-        <p class="text-muted mb-2"><i class="bi bi-clock"></i> Last watched: Jun 5, 2025</p>
-        <p class="mb-0">A mind-bending sci-fi thriller where dreams and reality collide.</p>
-        <div class="mt-2">
-            <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i> Remove</button>
+    @if(items == null || items.isEmpty()) {
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle"></i>
+            Your watchlist is empty. Go to AI recommendations and add something!
         </div>
-    </div>
+    @endif
 
-    <div class="watch-card">
-        <h5 class="fw-bold mb-1">Oppenheimer (2023)</h5>
-        <p class="text-muted mb-2"><i class="bi bi-clock"></i> Last watched: Feb 11, 2025</p>
-        <p class="mb-0">Christopher Nolan’s masterful biopic exploring the father of the atomic bomb.</p>
-        <div class="mt-2">
-            <button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i> Remove</button>
+    @if(items != null && !items.isEmpty()) {
+        <div class="row">
+            @for(WatchlistItem item : items) {
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body d-flex flex-column">
+
+                            <h5 class="card-title mb-1">
+                                ${item.getTitle()}
+                                @if(item.getYear() != null) {
+                                    <small class="text-muted">(${item.getYear()})</small>
+                                @endif
+                            </h5>
+
+                            @if(item.getServices() != null && !item.getServices().isEmpty()) {
+                                <p class="card-text mb-1">
+                                    <small class="text-muted">
+                                        Streaming: ${String.join(", ", item.getServices())}
+                                    </small>
+                                </p>
+                            @endif
+
+                            @if(item.getPitch() != null) {
+                                <p class="card-text flex-grow-1">
+                                    ${item.getPitch()}
+                                </p>
+                            @endif
+
+                            <div class="mt-2 d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    @if(item.getSourceAssetId() != null) {
+                                        From asset #${item.getSourceAssetId()}
+                                    @endif
+                                </small>
+                                <form method="post" action="/watchlist/${item.getId()}/delete">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger btn-custom">
+                                        <i class="bi bi-trash"></i> Remove
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            @endfor
         </div>
-    </div>
-
-    <div class="text-center mt-4">
-        <a href="/assets/new" class="btn btn-lg btn-primary fw-bold">
-            <i class="bi bi-magic"></i> Get AI Movie Recommendations
-        </a>
-        <br><br>
-        <a href="/" class="btn btn-outline-secondary btn-lg fw-bold">
-            <i class="bi bi-house-door"></i> Home
-        </a>
-    </div>
-</main>
-
-<footer class="border-top text-center text-muted py-3 mt-4">
-</footer>
+    @endif
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
