@@ -3,22 +3,26 @@ package com.example.movieassistant.service;
 import com.example.movieassistant.model.WatchlistItem;
 import com.example.movieassistant.model.MovieRecommendation;
 import com.example.movieassistant.model.RecommendationResult;
+import com.example.movieassistant.repo.WatchlistItemRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.List;
 
 @Service
 public class WatchlistService {
 
-    private final Map<String, List<WatchlistItem>> store = new ConcurrentHashMap<>();
-    private final AtomicLong idSeq = new AtomicLong(1);
+    private final WatchlistItemRepository repo;
 
-    public List<WatchlistItem> listFor(String username) {
-        return store.getOrDefault(username.toLowerCase(), List.of());
+    public WatchlistService(WatchlistItemRepository repo) {
+        this.repo = repo;
     }
 
+    public List<WatchlistItem> listFor(String username) {
+        return repo.findByOwnerUsernameIgnoreCase(username);
+    }
+
+    @Transactional
     public WatchlistItem addFromRecommendation(String username,
                                                long assetId,
                                                int index,
@@ -30,25 +34,20 @@ public class WatchlistService {
 
         MovieRecommendation rec = recs.get(index);
 
-        long id = idSeq.getAndIncrement();
-        WatchlistItem item = new WatchlistItem(
-                id,
-                username,
-                rec.getTitle(),
-                rec.getYear(),
-                rec.getServices(),
-                rec.getPitch(),
-                assetId,
-                index
-        );
+        WatchlistItem item = new WatchlistItem();
+        item.setOwnerUsername(username.toLowerCase());
+        item.setTitle(rec.getTitle());
+        item.setYear(rec.getYear());
+        item.setServices(rec.getServices());
+        item.setPitch(rec.getPitch());
+        item.setSourceAssetId(assetId);
+        item.setSourceIndex(index);
 
-        store.computeIfAbsent(username.toLowerCase(), k -> new ArrayList<>()).add(item);
-        return item;
+        return repo.save(item);
     }
 
+    @Transactional
     public void remove(String username, long itemId) {
-        List<WatchlistItem> items = store.get(username.toLowerCase());
-        if (items == null) return;
-        items.removeIf(i -> i.getId() == itemId);
+        repo.deleteByOwnerUsernameIgnoreCaseAndId(username.toLowerCase(), itemId);
     }
 }

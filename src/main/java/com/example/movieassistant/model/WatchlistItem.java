@@ -1,21 +1,36 @@
 package com.example.movieassistant.model;
 
+import jakarta.persistence.*;
 import java.util.List;
 
+@Entity
+@Table(name = "watchlist_items")
 public class WatchlistItem {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     private String ownerUsername;
 
     private String title;
     private Integer year;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "watchlist_item_services",
+            joinColumns = @JoinColumn(name = "watchlist_item_id")
+    )
+    @Column(name = "service")
     private List<String> services;
+
     private String pitch;
 
     private Long sourceAssetId;
     private Integer sourceIndex; // which recommendation in that asset
 
-    public WatchlistItem() {}
+    public WatchlistItem() {
+    }
 
     public WatchlistItem(long id,
                          String ownerUsername,

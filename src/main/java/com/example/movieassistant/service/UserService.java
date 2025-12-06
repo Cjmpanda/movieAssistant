@@ -1,31 +1,35 @@
 package com.example.movieassistant.service;
 
 import com.example.movieassistant.model.UserAccount;
+import com.example.movieassistant.repo.UserAccountRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
-    private final Map<String, UserAccount> users = new ConcurrentHashMap<>();
 
-    public boolean exists(String username) {
-        return users.containsKey(username.toLowerCase());
+    private final UserAccountRepository repo;
+
+    public UserService(UserAccountRepository repo) {
+        this.repo = repo;
     }
 
+    public boolean exists(String username) {
+        return repo.existsByUsernameIgnoreCase(username);
+    }
+
+    @Transactional
     public UserAccount register(String username, String rawPassword) {
         String key = username.toLowerCase();
-        if (users.containsKey(key)) {
-            throw new IllegalArgumentException("Username already taken");
+        if (repo.existsByUsernameIgnoreCase(key)) {
+            throw new IllegalStateException("User already exists");
         }
-        UserAccount ua = new UserAccount(username, rawPassword);
-        users.put(key, ua);
-        return ua;
+        UserAccount ua = new UserAccount(key, rawPassword);
+        return repo.save(ua);
     }
 
     public UserAccount find(String username) {
-        return users.get(username.toLowerCase());
+        return repo.findByUsernameIgnoreCase(username.toLowerCase());
     }
 
     public boolean verify(String username, String rawPassword) {
