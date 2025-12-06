@@ -1,106 +1,70 @@
-@param String username
-@param String zip
-@param java.util.List<java.util.Map<String, Object>> theaters
+@import com.example.movieassistant.model.Theater
+@import com.example.movieassistant.model.MovieShowtime
+@params String zip, java.util.List<Theater> theaters
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Theater Navigator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/flatly/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Theater Navigator</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f6f7fb; margin: 0; padding: 20px; }
+    .panel { background: #fff; border-radius: 8px; padding: 14px; box-shadow: 0 1px 6px rgba(0,0,0,0.12); }
+    h1 { margin: 0 0 10px 0; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+    input { padding: 8px 10px; border: 1px solid #cfd4e6; border-radius: 6px; min-width: 180px; }
+    button { padding: 8px 12px; border: none; border-radius: 6px; background:#2f5bff; color: white; cursor: pointer; }
+    .theater { margin-top: 12px; }
+    .theater h2 { margin: 0 0 4px 0; font-size: 18px; }
+    .muted { color: #6070a6; font-size: 14px; }
+    .movie { margin-top: 8px; padding: 10px; background:#f1f3ff; border-radius: 6px; }
+    .tag { display:inline-block; margin: 2px 6px 2px 0; padding: 2px 7px; border-radius: 999px;
+           background:#2f5bff; color:#fff; font-size: 13px; }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 
-<header class="bg-primary text-white py-3 mb-4">
-    <div class="container d-flex align-items-center">
-        <h1 class="h4 mb-0 d-flex align-items-center gap-2">
-            <i class="bi bi-geo-alt"></i> Theater Navigator
-        </h1>
-        <div class="ms-auto">
-            @if (username != null)
-                <span class="me-2">Hello, <strong>${username}</strong></span>
-                <a href="/logout" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            @else
-                <a href="/login" class="btn btn-outline-light btn-sm me-1">
-                    <i class="bi bi-box-arrow-in-right"></i> Login
-                </a>
-                <a href="/register" class="btn btn-light btn-sm">
-                    <i class="bi bi-person-plus"></i> Register
-                </a>
-            @endif
+  <div class="panel">
+    <h1>Theater Navigator</h1>
+    <div class="row">
+      <form method="get" action="/theater-navigator" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+        <div>
+          <label class="muted">Enter ZIP code</label><br/>
+          <input name="zip" value="${zip}" placeholder="e.g., 90001" required />
         </div>
+        <button type="submit">Search</button>
+      </form>
     </div>
-</header>
+  </div>
 
-<div class="container pb-5">
+  @if(zip != null && !zip.isBlank()) {
+    <div class="panel" style="margin-top: 14px;">
+      <h2>Results for <span class="muted">${zip}</span></h2>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h2 class="h5 mb-3">
-                <i class="bi bi-search"></i> Find theaters by ZIP
-            </h2>
-            <form method="post" action="/theaters" class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">ZIP code</label>
-                    <input type="text"
-                           name="zip"
-                           class="form-control"
-                           value="${zip}"
-                           placeholder="Enter zip-code here"
-                           required>
+      @if(theaters == null || theaters.isEmpty()) {
+        <p class="muted">No theaters found (try a different ZIP or enable MovieGlu mode).</p>
+      } else {
+        @for(Theater t : theaters) {
+          <div class="theater">
+            <h2>${t.name}</h2>
+            <div class="muted">${t.distance}</div>
+
+            @for(MovieShowtime m : t.movies) {
+              <div class="movie">
+                <div><strong>${m.title}</strong></div>
+                <div>
+                  @for(String time : m.times) {
+                    <span class="tag">${time}</span>
+                  }
                 </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-search"></i> Search
-                    </button>
-                </div>
-            </form>
-        </div>
+              </div>
+            }
+          </div>
+        }
+      }
     </div>
+  }
 
-    @if (theaters != null)
-        <div class="row">
-            @for (java.util.Map<String, Object> theater : theaters)
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-body">
-                            <h3 class="h5 mb-1">
-                                ${(String) theater.get("name")}
-                            </h3>
-                            <p class="text-muted mb-3">
-                                ${(String) theater.get("distance")}
-                            </p>
-
-                            <h4 class="h6 text-uppercase text-secondary mb-2">
-                                Movies playing now:
-                            </h4>
-
-                            @for (java.util.Map<String, Object> movie : (java.util.List<java.util.Map<String, Object>>) theater.get("movies"))
-                                <div class="mb-2">
-                                    <strong>${(String) movie.get("title")}</strong><br/>
-                                    <small class="text-muted">
-                                        @for (String time : (java.util.List<String>) movie.get("times"))
-                                            ${time}
-                                        @endfor
-                                    </small>
-                                </div>
-                            @endfor
-                        </div>
-                    </div>
-                </div>
-            @endfor
-        </div>
-    @endif
-
-    <a href="/" class="btn btn-link mt-3">
-        <i class="bi bi-house"></i> Back to Home
-    </a>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
