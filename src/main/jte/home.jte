@@ -47,7 +47,7 @@
     </div>
 </header>
 
-<!-- Title banner (matches your homePage.html style) -->
+<!-- Title banner -->
 <section class="text-center py-4" style="background:#d9eafd;">
     <h1 class="fw-bold d-flex justify-content-center align-items-center gap-2 mb-0">
         <i class="bi bi-film"></i>
@@ -103,14 +103,22 @@
                 </p>
             </div>
         </div>
+
     @else
-        <!-- Logged-in actions -->
+        <!-- Logged-in actions  -->
         <div class="text-center">
             <h4 class="fw-bold text-success mb-3">Welcome back, ${username}!</h4>
-            <a href="/assets" class="btn btn-primary btn-lg me-2">
+
+            <a href="/assets" class="btn btn-primary btn-lg me-2 mb-2">
                 <i class="bi bi-collection-play"></i> Go to Dashboard
             </a>
-            <a href="/logout" class="btn btn-outline-dark btn-lg">
+
+            <!-- Theater Navigator -->
+            <a href="/theater-navigator" class="btn btn-outline-primary btn-lg me-2 mb-2">
+                <i class="bi bi-geo-alt"></i> Theater Navigator
+            </a>
+
+            <a href="/logout" class="btn btn-outline-dark btn-lg mb-2">
                 <i class="bi bi-box-arrow-right"></i> Logout
             </a>
         </div>
