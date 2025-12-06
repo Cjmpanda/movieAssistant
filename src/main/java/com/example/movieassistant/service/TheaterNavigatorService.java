@@ -4,12 +4,20 @@ import com.example.movieassistant.model.MovieShowtime;
 import com.example.movieassistant.model.Theater;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Uses real APIs:
+ *  - Google Places: find movie theaters near a ZIP code
+ *  - TMDB: get "now playing" movies
+ *
+ * If TMDB fails (bad API key, etc), we still show theaters without movies.
+ */
 @Service
 public class TheaterNavigatorService {
 
@@ -26,17 +34,26 @@ public class TheaterNavigatorService {
             return List.of();
         }
 
-        List<Theater> theaters = fetchTheatersFromGoogle(zip);
-        List<MovieShowtime> movies = fetchNowPlayingFromTmdb();
+        System.out.println("Looking up theaters for zip=" + zip);
 
-        if (theaters.isEmpty() || movies.isEmpty()) {
-            // if something fails (no keys / bad response), return empty list
+        List<Theater> theaters = fetchTheatersFromGoogle(zip);
+        System.out.println("Google returned theaters: " + theaters.size());
+
+        List<MovieShowtime> movies = fetchNowPlayingFromTmdb();
+        System.out.println("TMDB returned movies: " + movies.size());
+
+        if (theaters.isEmpty()) {
+            // No theaters at all -> nothing to show
             return List.of();
         }
 
-        // Attach a few real movies to each theater
-        List<Theater> result = new ArrayList<>();
+        // If TMDB failed or returned nothing, just show theaters without movies
+        if (movies.isEmpty()) {
+            return theaters;
+        }
 
+        // Attach some movies to each theater
+        List<Theater> result = new ArrayList<>();
         for (Theater t : theaters) {
             int limit = Math.min(3, movies.size());
             List<MovieShowtime> subset = new ArrayList<>(movies.subList(0, limit));
@@ -51,6 +68,7 @@ public class TheaterNavigatorService {
 
     private List<Theater> fetchTheatersFromGoogle(String zip) {
         if (googleApiKey == null || googleApiKey.isBlank()) {
+            System.out.println("Google API key is missing or blank!");
             return Collections.emptyList();
         }
 
@@ -64,6 +82,7 @@ public class TheaterNavigatorService {
                     restTemplate.getForObject(url, GooglePlacesResponse.class);
 
             if (response == null || response.results == null) {
+                System.out.println("Google Places returned no results.");
                 return Collections.emptyList();
             }
 
@@ -84,8 +103,8 @@ public class TheaterNavigatorService {
             }
 
             return theaters;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (RestClientException e) {
+            System.out.println("Error calling Google Places: " + e.getMessage());
             return Collections.emptyList();
         }
     }
@@ -94,6 +113,7 @@ public class TheaterNavigatorService {
 
     private List<MovieShowtime> fetchNowPlayingFromTmdb() {
         if (tmdbApiKey == null || tmdbApiKey.isBlank()) {
+            System.out.println("TMDB API key is missing or blank!");
             return Collections.emptyList();
         }
 
@@ -106,6 +126,7 @@ public class TheaterNavigatorService {
                     restTemplate.getForObject(url, TmdbNowPlayingResponse.class);
 
             if (response == null || response.results == null) {
+                System.out.println("TMDB returned no results.");
                 return Collections.emptyList();
             }
 
@@ -115,14 +136,15 @@ public class TheaterNavigatorService {
                 if (r.title == null) {
                     continue;
                 }
-                // generic times just for UI (titles are real)
+                // Generic times just for UI, titles are real
                 List<String> times = List.of("1:00pm", "4:00pm", "7:30pm");
                 movies.add(new MovieShowtime(r.title, times));
             }
 
             return movies;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (RestClientException e) {
+            System.out.println("Error calling TMDB: " + e.getMessage());
+            // Do NOT crash the app; just return empty so we still show theaters
             return Collections.emptyList();
         }
     }
