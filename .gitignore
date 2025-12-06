@@ -34,3 +34,22 @@ build/
 
 ### JTE ###
 /jte-classes/
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/awt.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/extnet.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/fontmanager.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/freetype.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/java.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/jimage.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/management.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/management_ext.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/msvcp140.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/net.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/nio.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/server/jvm.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/splashscreen.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/vcruntime140.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/vcruntime140_1.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/verify.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/bin/zip.dll
+src/main/java/com/example/movieassistant/config/openJdk-25/lib/jrt-fs.jar
+src/main/java/com/example/movieassistant/config/openJdk-25/lib/modules
