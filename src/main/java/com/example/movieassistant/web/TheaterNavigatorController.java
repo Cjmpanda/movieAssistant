@@ -21,6 +21,7 @@ public class TheaterNavigatorController {
     @GetMapping("/theater-navigator")
     public String theaterNavigator(@RequestParam(value = "zip", required = false) String zip,
                                    Model model) {
+
         model.addAttribute("zip", zip);
 
         List<Theater> theaters = (zip == null || zip.isBlank())

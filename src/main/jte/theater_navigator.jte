@@ -1,6 +1,8 @@
 @import com.example.movieassistant.model.Theater
 @import com.example.movieassistant.model.MovieShowtime
-@params String zip, java.util.List<Theater> theaters
+
+@param String zip
+@param java.util.List<Theater> theaters
 
 <!DOCTYPE html>
 <html lang="en">
@@ -38,33 +40,33 @@
     </div>
   </div>
 
-  @if(zip != null && !zip.isBlank()) {
+  @if(zip != null && !zip.isBlank())
     <div class="panel" style="margin-top: 14px;">
       <h2>Results for <span class="muted">${zip}</span></h2>
 
-      @if(theaters == null || theaters.isEmpty()) {
-        <p class="muted">No theaters found (try a different ZIP or enable MovieGlu mode).</p>
-      } else {
-        @for(Theater t : theaters) {
+      @if(theaters == null || theaters.isEmpty())
+        <p class="muted">No theaters found. Check your API keys or try a different ZIP.</p>
+      @else
+        @for(Theater t : theaters)
           <div class="theater">
-            <h2>${t.name}</h2>
-            <div class="muted">${t.distance}</div>
+            <h2>${t.getName()}</h2>
+            <div class="muted">${t.getDistance()}</div>
 
-            @for(MovieShowtime m : t.movies) {
+            @for(MovieShowtime m : t.getMovies())
               <div class="movie">
-                <div><strong>${m.title}</strong></div>
+                <div><strong>${m.getTitle()}</strong></div>
                 <div>
-                  @for(String time : m.times) {
+                  @for(String time : m.getTimes())
                     <span class="tag">${time}</span>
-                  }
+                  @endfor
                 </div>
               </div>
-            }
+            @endfor
           </div>
-        }
-      }
+        @endfor
+      @endif
     </div>
-  }
+  @endif
 
 </body>
 </html>
