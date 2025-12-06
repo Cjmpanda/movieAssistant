@@ -11,13 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Uses real APIs:
- *  - Google Places: find movie theaters near a ZIP code
- *  - TMDB: get "now playing" movies
- *
- * If TMDB fails (bad API key, etc), we still show theaters without movies.
- */
 @Service
 public class TheaterNavigatorService {
 
@@ -47,12 +40,10 @@ public class TheaterNavigatorService {
             return List.of();
         }
 
-        // If TMDB failed or returned nothing, just show theaters without movies
         if (movies.isEmpty()) {
             return theaters;
         }
 
-        // Attach some movies to each theater
         List<Theater> result = new ArrayList<>();
         for (Theater t : theaters) {
             int limit = Math.min(3, movies.size());
@@ -144,7 +135,6 @@ public class TheaterNavigatorService {
             return movies;
         } catch (RestClientException e) {
             System.out.println("Error calling TMDB: " + e.getMessage());
-            // Do NOT crash the app; just return empty so we still show theaters
             return Collections.emptyList();
         }
     }

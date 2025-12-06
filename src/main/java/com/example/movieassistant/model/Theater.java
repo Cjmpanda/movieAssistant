@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Theater {
     private String name;
-    private String distance; // we'll show the address/area here
+    private String distance; 
     private List<MovieShowtime> movies;
 
     public Theater() {
